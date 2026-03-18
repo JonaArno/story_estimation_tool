@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Estimation</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Join screen -->
+  <div id="screen-join" class="screen active">
+    <div class="card join-card">
+      <h1>Story Estimation</h1>
+      <p class="subtitle">Fibonacci-based planning poker for your team</p>
+      <form id="form-join">
+        <label for="input-name">Your name</label>
+        <input id="input-name" type="text" placeholder="e.g. Alice" maxlength="40" autocomplete="off" required />
+        <button type="submit" class="btn btn-primary">Join session</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Room screen -->
+  <div id="screen-room" class="screen">
+    <header class="room-header">
+      <div class="room-header-left">
+        <span class="room-title">Story Estimation</span>
+        <span id="room-id-label" class="room-id-chip" title="Room ID"></span>
+      </div>
+      <div class="room-header-right">
+        <button id="btn-copy-link" class="btn btn-secondary btn-sm">Copy invite link</button>
+        <span id="self-name-badge" class="self-name-badge"></span>
+      </div>
+    </header>
+
+    <main class="room-body">
+
+      <!-- Story panel -->
+      <section class="story-panel">
+        <div class="story-input-row">
+          <input id="input-story" type="text" placeholder="Enter user story title…" maxlength="200" autocomplete="off" />
+          <button id="btn-set-story" class="btn btn-primary btn-sm">Set story</button>
+        </div>
+        <div id="story-display" class="story-display hidden"></div>
+      </section>
+
+      <!-- Voting cards -->
+      <section class="cards-panel">
+        <p class="cards-label">Your vote</p>
+        <div class="cards-row" id="cards-row">
+          <!-- Cards inserted by JS -->
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <section class="actions-panel">
+        <button id="btn-reveal" class="btn btn-accent">Reveal votes</button>
+        <button id="btn-new-round" class="btn btn-secondary hidden">New round</button>
+      </section>
+
+      <!-- Results (shown after reveal) -->
+      <section id="results-panel" class="results-panel hidden">
+        <h2>Results</h2>
+        <div id="results-stats" class="results-stats"></div>
+      </section>
+
+      <!-- Participants -->
+      <section class="participants-panel">
+        <h2>Participants</h2>
+        <ul id="participants-list" class="participants-list"></ul>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
