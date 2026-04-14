@@ -450,6 +450,63 @@ input[type="text"]:focus {
 
 .toast.show { opacity: 1; }
 
+/* ── Spectator join option ────────────────────────────────── */
+.spectator-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .85rem;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+  margin: 0;
+}
+
+.spectator-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.spectator-label-hint {
+  color: var(--text-muted);
+  font-size: .78rem;
+}
+
+/* ── Spectator self-name badge ────────────────────────────── */
+.self-name-badge.is-spectator::after {
+  content: ' · Spectator';
+  color: var(--text-muted);
+  font-size: .75em;
+}
+
+/* ── Spectator participant items ─────────────────────────── */
+.participant-item.is-spectator {
+  border-color: transparent;
+  background: rgba(136,146,176,.06);
+  opacity: .8;
+}
+
+.participant-avatar.spectator-avatar {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.spectator-badge {
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(136,146,176,.1);
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  letter-spacing: .03em;
+}
+
 /* ── Join form vertical spacing ──────────────────────────── */
 #form-join { display: flex; flex-direction: column; gap: 12px; }
 

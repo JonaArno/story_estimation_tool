@@ -16,6 +16,10 @@
       <form id="form-join">
         <label for="input-name">Your name</label>
         <input id="input-name" type="text" placeholder="e.g. Alice" maxlength="40" autocomplete="off" required />
+        <label class="spectator-label">
+          <input id="input-spectator" type="checkbox" />
+          Join as spectator <span class="spectator-label-hint">(view only, no voting)</span>
+        </label>
         <button type="submit" class="btn btn-primary">Join session</button>
       </form>
     </div>
