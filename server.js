@@ -28,6 +28,7 @@ function getRoomSummary(room) {
   const participants = Object.values(room.participants).map(p => ({
     id: p.id,
     name: p.name,
+    isSpectator: p.isSpectator,
     hasVoted: p.vote !== null,
     vote: room.revealed ? p.vote : null,
   }));
@@ -42,7 +43,7 @@ io.on('connection', (socket) => {
   let currentRoom = null;
   let participantId = uuidv4();
 
-  socket.on('join', ({ roomId, name }) => {
+  socket.on('join', ({ roomId, name, isSpectator }) => {
     if (!name || !name.trim()) return;
     if (!roomId) return;
 
@@ -54,6 +55,7 @@ io.on('connection', (socket) => {
       id: participantId,
       name: name.trim(),
       vote: null,
+      isSpectator: !!isSpectator,
     };
 
     io.to(roomId).emit('room_update', getRoomSummary(room));
@@ -76,7 +78,7 @@ io.on('connection', (socket) => {
     const room = getRoom(currentRoom);
     if (room.revealed) return;
     const participant = room.participants[participantId];
-    if (!participant) return;
+    if (!participant || participant.isSpectator) return;
     participant.vote = value;
     io.to(currentRoom).emit('room_update', getRoomSummary(room));
   });

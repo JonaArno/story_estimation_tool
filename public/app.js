@@ -4,6 +4,7 @@ const FIBONACCI = [1, 2, 3, 5, 8, 13, 21];
 /* ── State ─────────────────────────────────────────────────── */
 let socket;
 let myName = '';
+let myIsSpectator = false;
 let myVote = null;
 let roomState = null;
 
@@ -24,6 +25,7 @@ const participantsList = document.getElementById('participants-list');
 const btnCopyLink = document.getElementById('btn-copy-link');
 const roomIdLabel = document.getElementById('room-id-label');
 const selfNameBadge = document.getElementById('self-name-badge');
+const inputSpectator = document.getElementById('input-spectator');
 const toast = document.getElementById('toast');
 
 /* ── Room ID from URL (or generate new) ───────────────────── */
@@ -73,6 +75,7 @@ formJoin.addEventListener('submit', (e) => {
   const name = inputName.value.trim();
   if (!name) return;
   myName = name;
+  myIsSpectator = inputSpectator.checked;
   connect();
 });
 
@@ -80,7 +83,7 @@ function connect() {
   socket = io();
 
   socket.on('connect', () => {
-    socket.emit('join', { roomId, name: myName });
+    socket.emit('join', { roomId, name: myName, isSpectator: myIsSpectator });
     showRoom();
   });
 
@@ -100,7 +103,15 @@ function showRoom() {
   screenRoom.classList.add('active');
   roomIdLabel.textContent = `Room: ${roomId}`;
   selfNameBadge.textContent = myName;
-  buildCards();
+  selfNameBadge.classList.toggle('is-spectator', myIsSpectator);
+
+  const cardsPanel = document.querySelector('.cards-panel');
+  if (myIsSpectator) {
+    cardsPanel.classList.add('hidden');
+  } else {
+    cardsPanel.classList.remove('hidden');
+    buildCards();
+  }
 }
 
 /* ── Copy invite link ──────────────────────────────────────── */
@@ -157,13 +168,15 @@ function render(state) {
     storyDisplay.classList.add('hidden');
   }
 
-  // Cards: disable when revealed
-  for (const btn of cardsRow.querySelectorAll('.card-btn')) {
-    btn.disabled = state.revealed;
-  }
-  if (state.revealed) {
-    // Keep card selection visible but disabled
-    if (myVote !== null) updateCardSelection(myVote);
+  // Cards: disable when revealed (only relevant for non-spectators)
+  if (!myIsSpectator) {
+    for (const btn of cardsRow.querySelectorAll('.card-btn')) {
+      btn.disabled = state.revealed;
+    }
+    if (state.revealed) {
+      // Keep card selection visible but disabled
+      if (myVote !== null) updateCardSelection(myVote);
+    }
   }
 
   // Actions
@@ -176,8 +189,8 @@ function render(state) {
     resultsPanel.classList.remove('hidden');
   } else {
     resultsPanel.classList.add('hidden');
-    // Restore own vote selection after new round resets
-    if (!state.revealed) updateCardSelection(myVote);
+    // Restore own vote selection after new round resets (non-spectators only)
+    if (!myIsSpectator && !state.revealed) updateCardSelection(myVote);
   }
 
   // Participants
@@ -187,6 +200,7 @@ function render(state) {
 /* ── Render results ────────────────────────────────────────── */
 function renderResults(participants) {
   const votes = participants
+    .filter(p => !p.isSpectator)
     .map(p => p.vote)
     .filter(v => v !== null)
     .map(Number);
@@ -242,16 +256,23 @@ function renderParticipants(participants, revealed) {
     const initials = p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const hasVoted = p.hasVoted || p.vote !== null;
     const li = document.createElement('li');
-    li.className = 'participant-item';
+    li.className = `participant-item${p.isSpectator ? ' is-spectator' : ''}`;
+
+    let statusEl;
+    if (p.isSpectator) {
+      statusEl = `<span class="spectator-badge">Spectator</span>`;
+    } else if (revealed && p.vote !== null) {
+      statusEl = `<span class="participant-vote-value">${p.vote}</span>`;
+    } else {
+      statusEl = `<span class="participant-status ${hasVoted ? 'status-voted' : 'status-waiting'}">
+                    ${hasVoted ? 'Voted' : 'Waiting…'}
+                  </span>`;
+    }
+
     li.innerHTML = `
-      <div class="participant-avatar">${initials}</div>
+      <div class="participant-avatar${p.isSpectator ? ' spectator-avatar' : ''}">${initials}</div>
       <span class="participant-name">${escapeHtml(p.name)}</span>
-      ${revealed && p.vote !== null
-        ? `<span class="participant-vote-value">${p.vote}</span>`
-        : `<span class="participant-status ${hasVoted ? 'status-voted' : 'status-waiting'}">
-             ${hasVoted ? 'Voted' : 'Waiting…'}
-           </span>`
-      }
+      ${statusEl}
     `;
     participantsList.appendChild(li);
   }
